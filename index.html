@@ -211,7 +211,9 @@
     .msb-type{font-size:9px;font-weight:700;color:white;padding:2px 6px;border-radius:4px;text-transform:capitalize;flex-shrink:0}
     .coverage-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;box-shadow:var(--glass-shadow);margin-bottom:12px}
     .coverage-title{font-size:15px;font-weight:700;margin-bottom:12px}
-    .coverage-types{display:flex;flex-wrap:wrap;gap:6px}
+    .coverage-types{display:flex;flex-wrap:wrap;gap:5px}
+    .cov-section-lbl{font-size:11px;font-weight:700;color:var(--subtext);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
+    .missing-pill{opacity:0.35;filter:saturate(0.6)}
 
     /* TYPE CHART CALCULATOR */
     #types-view{display:none;padding:16px 16px calc(var(--safe-bottom)+70px)}
@@ -350,14 +352,30 @@
   </div>
   <div class="team-grid" id="team-grid"></div>
   <div class="coverage-card">
-    <div class="coverage-title" style="display:flex;align-items:center;justify-content:space-between">
-      <span>⚔️ Offensive Type Coverage</span>
-      <span id="offCoveragePct" style="font-size:13px;font-weight:700;color:var(--subtext)"></span>
+    <div class="coverage-title">⚔️ Offensive Type Coverage</div>
+    <!-- Two-tone progress bar -->
+    <div id="offCoverageBarWrap" style="display:none;margin-bottom:14px">
+      <div style="display:flex;height:22px;border-radius:11px;overflow:hidden">
+        <div id="offBarCovered" style="display:flex;align-items:center;justify-content:center;height:100%;min-width:0;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+        <div id="offBarMissing" style="flex:1;display:flex;align-items:center;justify-content:center;background:#e8e8e8;min-width:0"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px">
+        <span id="offBarCovLbl" style="font-size:11px;font-weight:700"></span>
+        <span id="offBarMisLbl" style="font-size:11px;font-weight:700;color:#aaa"></span>
+      </div>
     </div>
-    <div id="offCoverageBar" style="height:6px;border-radius:3px;background:#f0f0f0;margin-bottom:12px;overflow:hidden;display:none">
-      <div id="offCoverageBarFill" style="height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+    <!-- Covered / Missing split -->
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div class="cov-section-lbl">✓ Covered</div>
+        <div class="coverage-types" id="offCoverage"></div>
+      </div>
+      <div style="width:1px;background:var(--border);align-self:stretch;flex-shrink:0;margin-top:20px"></div>
+      <div style="flex:1;min-width:0">
+        <div class="cov-section-lbl">✗ Missing</div>
+        <div class="coverage-types" id="offMissing"></div>
+      </div>
     </div>
-    <div class="coverage-types" id="offCoverage"></div>
   </div>
   <div class="coverage-card">
     <div class="coverage-title">🛡 Team Weaknesses</div>
@@ -1010,29 +1028,40 @@ function renderTeam(){
 
 function updateCoverage(){
   const team=activeTeam();
-  // Offensive: Pokémon own types + types of assigned moves (from cache)
+  // Offensive: types of assigned moves only
   const offTypes=new Set(team.flatMap(p=>
     p.moves.filter(Boolean).map(m=>moveDetailCache[m]?.type).filter(Boolean)
   ));
-  // Coverage %: how many of the 18 types have at least one super-effective attack
+  // Which of the 18 types are covered (at least one move hits super-effective)
   const coveredTypes=TYPES.filter(def=>[...offTypes].some(atk=>getEff(atk,def)>1));
+  const missingTypes=TYPES.filter(def=>!coveredTypes.includes(def));
   const pct=offTypes.size===0?0:Math.round(coveredTypes.length/TYPES.length*100);
   const barColor=pct>=80?'#78C850':pct>=50?'#F8D030':'#F08030';
-  const pctEl=document.getElementById('offCoveragePct');
-  const barWrap=document.getElementById('offCoverageBar');
-  const barFill=document.getElementById('offCoverageBarFill');
+  const barWrap=document.getElementById('offCoverageBarWrap');
+  const barCov=document.getElementById('offBarCovered');
+  const barMis=document.getElementById('offBarMissing');
   if(offTypes.size>0){
-    pctEl.textContent=pct+'%';
-    pctEl.style.color=barColor;
     barWrap.style.display='block';
-    requestAnimationFrame(()=>{barFill.style.width=pct+'%';barFill.style.background=barColor;});
+    requestAnimationFrame(()=>{
+      barCov.style.width=pct+'%';
+      barCov.style.background=barColor;
+      barCov.innerHTML=pct>12?`<span style="font-size:10px;font-weight:700;color:white">${pct}%</span>`:'';
+      barMis.innerHTML=pct<=87?`<span style="font-size:10px;font-weight:700;color:#999">${100-pct}%</span>`:'';
+    });
+    document.getElementById('offBarCovLbl').innerHTML=`<span style="color:${barColor}">${coveredTypes.length}/18 covered</span>`;
+    document.getElementById('offBarMisLbl').textContent=`${missingTypes.length} missing`;
   }else{
-    pctEl.textContent='';
     barWrap.style.display='none';
+    document.getElementById('offBarCovLbl').textContent='';
+    document.getElementById('offBarMisLbl').textContent='';
   }
-  document.getElementById('offCoverage').innerHTML=offTypes.size===0
-    ?'<span style="color:var(--subtext);font-size:13px">Add Pokémon to see coverage</span>'
-    :[...offTypes].map(t=>`<span class="type-pill" style="background:${TC[t]};padding:5px 12px;font-size:12px">${cap(t)}</span>`).join('');
+  const typePill=(t,missing)=>`<span class="type-pill${missing?' missing-pill':''}" style="background:${TC[t]};padding:4px 10px;font-size:11px">${cap(t)}</span>`;
+  document.getElementById('offCoverage').innerHTML=coveredTypes.length===0
+    ?'<span style="color:var(--subtext);font-size:12px">No moves set</span>'
+    :coveredTypes.map(t=>typePill(t,false)).join('');
+  document.getElementById('offMissing').innerHTML=missingTypes.length===0
+    ?'<span style="color:var(--subtext);font-size:12px">All covered!</span>'
+    :missingTypes.map(t=>typePill(t,true)).join('');
   // Defensive: weakness count per type
   const weakMap={};
   team.forEach(p=>{if(!p.types.length)return;const wmap=getDualWeak(p.types[0],p.types[1]);Object.entries(wmap).forEach(([t,m])=>{if(m>1)weakMap[t]=(weakMap[t]||0)+1})});
