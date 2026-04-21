@@ -126,12 +126,12 @@
     .weak-chip{padding:4px 10px;border-radius:10px;font-size:11px;font-weight:700;color:white;text-shadow:0 1px 2px rgba(0,0,0,.2)}
     .weak-chip .mult{font-size:9px;opacity:.9;margin-left:3px;font-weight:800}
 
-    /* MOVE TABLE */
-    .move-table{width:100%;border-collapse:collapse;font-size:12px}
-    .move-table th{text-align:left;color:var(--subtext);font-weight:600;padding:6px 4px;border-bottom:1px solid var(--border);font-size:11px}
-    .move-table td{padding:7px 4px;border-bottom:1px solid #f5f5f5;vertical-align:middle}
-    .move-table tr:last-child td{border-bottom:none}
-    .move-name{font-weight:600;text-transform:capitalize}
+    /* MOVE LIST (detail page) */
+    .detail-move-row{padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.06)}
+    .detail-move-row:last-child{border-bottom:none}
+    .dmr-top{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:4px}
+    .dmr-name{font-size:13px;font-weight:700;text-transform:capitalize}
+    .dmr-learn{font-size:11px;color:var(--subtext);white-space:nowrap;flex-shrink:0}
     .move-game-select{width:100%;padding:9px 13px;border-radius:10px;border:1px solid var(--glass-border);font-size:14px;background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);color:var(--text);margin-bottom:12px;-webkit-appearance:none;appearance:none}
 
     /* EVO TREE */
@@ -205,8 +205,10 @@
     .ts-remove{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.5);border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--subtext)}
     .ts-edit{position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.5);border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .move-slots{display:flex;flex-direction:column;gap:5px;margin-top:8px;width:100%}
-    .move-slot-btn{width:100%;padding:6px 10px;border-radius:8px;border:1.5px dashed rgba(150,130,200,0.35);background:rgba(255,255,255,0.3);font-size:11px;font-weight:600;color:var(--subtext);cursor:pointer;text-align:left;text-transform:capitalize}
+    .move-slot-btn{width:100%;padding:6px 10px;border-radius:8px;border:1.5px dashed rgba(150,130,200,0.35);background:rgba(255,255,255,0.3);font-size:11px;font-weight:600;color:var(--subtext);cursor:pointer;text-align:left;text-transform:capitalize;display:flex;align-items:center;gap:6px}
     .move-slot-btn.filled{background:rgba(255,255,255,0.7);border-style:solid;border-color:var(--glass-border);color:var(--text)}
+    .msb-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .msb-type{font-size:9px;font-weight:700;color:white;padding:2px 6px;border-radius:4px;text-transform:capitalize;flex-shrink:0}
     .coverage-card{background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px;box-shadow:var(--glass-shadow);margin-bottom:12px}
     .coverage-title{font-size:15px;font-weight:700;margin-bottom:12px}
     .coverage-types{display:flex;flex-wrap:wrap;gap:6px}
@@ -240,10 +242,20 @@
     .modal-filters select{width:100%;padding:9px 13px;border-radius:10px;border:1px solid var(--border);font-size:14px;background:white;-webkit-appearance:none;appearance:none}
     .modal-filters input{width:100%;padding:9px 13px;border-radius:10px;border:1px solid var(--border);font-size:15px;outline:none}
     .modal-list{overflow-y:auto;flex:1;margin-top:8px}
-    .modal-move-item{display:flex;align-items:center;padding:11px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer}
-    .modal-move-item:active{background:#f9f9f9}
-    .modal-move-name{font-size:14px;font-weight:600;text-transform:capitalize;flex:1}
+    .modal-move-item{display:flex;flex-direction:column;align-items:flex-start;padding:10px 16px;border-bottom:1px solid rgba(0,0,0,0.06);cursor:pointer;gap:3px}
+    .modal-move-item:active{background:rgba(0,0,0,0.04)}
+    .modal-move-name{font-size:14px;font-weight:600;text-transform:capitalize}
     .modal-move-none{padding:16px;font-size:14px;color:var(--subtext);font-style:italic}
+    .move-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-height:18px}
+    .move-type-pill{font-size:10px;font-weight:700;color:white;padding:2px 7px;border-radius:5px;text-transform:capitalize;flex-shrink:0}
+    .move-cat-pill{font-size:10px;font-weight:700;color:white;padding:2px 7px;border-radius:5px;flex-shrink:0}
+    .move-stat-chip{font-size:10px;font-weight:700;border-radius:5px;padding:2px 7px;flex-shrink:0}
+    .msc-power{background:rgba(240,128,48,.15);color:#b05a10}
+    .msc-pp{background:rgba(104,144,240,.15);color:#3558b0}
+    .msc-acc{background:rgba(80,180,80,.15);color:#2a7a2a}
+    .move-meta-dots{font-size:10px;color:#ccc;letter-spacing:1px}
+    .move-slot-btn.filled{border-left-width:3px!important;border-left-style:solid!important}
+
 
     /* NICKNAME MODAL */
     .nick-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
@@ -320,7 +332,6 @@
   </div>
   <div class="filter-bar">
     <button class="filter-btn" id="fb-game" onclick="openFilterPicker('game')">🎮 All Games</button>
-    <button class="filter-btn" id="fb-gen" onclick="openFilterPicker('gen')">🌐 All Gens</button>
     <button class="filter-btn" id="fb-type" onclick="openFilterPicker('type')">🔷 All Types</button>
   </div>
   <div id="poke-list" class="poke-list"></div>
@@ -511,13 +522,13 @@ function extractId(url){return parseInt(url.split('/').filter(Boolean).pop())}
 function multLabel(m){if(m===0)return '×0';if(m<=0.25)return '×¼';if(m<1)return '×½';if(m>=4)return '×4';return '×2'}
 
 // ===== STATE =====
-let allPokemon=[],filteredPokemon=[],currentGen=null,currentGame=null,currentType=null;
+let allPokemon=[],filteredPokemon=[],currentGame=null,currentType=null;
 let teams=JSON.parse(localStorage.getItem('pdx_teams')||'[{"name":"Team 1","pokemon":[]}]');
 let currentTeamIdx=parseInt(localStorage.getItem('pdx_teamIdx')||'0');
 if(currentTeamIdx>=teams.length)currentTeamIdx=0;
 function activeTeam(){return teams[currentTeamIdx]?.pokemon||[]}
 let currentDetailId=null,currentSpriteGame='modern',currentMoveGame=null;
-const typeCache={},detailCache={},moveCache={},evoCache={},gamePokeCache={},typePokeCache={};
+const typeCache={},detailCache={},moveCache={},evoCache={},gamePokeCache={},typePokeCache={},moveDetailCache={};
 let movePicker={slotIndex:null,moveIndex:null,allMoves:[]};
 let nickPicker={slotIndex:null};
 const PAGE=40;let renderPage=1;
@@ -593,7 +604,6 @@ async function lazyTypes(id){
 async function filterPokemon(){
   const q=document.getElementById('search-input').value.toLowerCase().trim();
   let base=allPokemon;
-  if(currentGen){const[lo,hi]=GR[currentGen];base=base.filter(p=>p.id>=lo&&p.id<=hi)}
   if(currentGame){
     const ids=await getGameIds(currentGame);
     base=base.filter(p=>ids.has(p.id));
@@ -659,8 +669,6 @@ function openFilterPicker(kind){
   const body=document.getElementById('fpick-body');
   if(kind==='game'){
     body.innerHTML=`<div class="fpick-list">${GAME_OPTS.map(o=>`<div class="fpick-list-item${currentGame===o.v?' sel':''}" onclick="applyFilter('game',${o.v===null?'null':`'${o.v}'`})">${o.l}</div>`).join('')}</div>`;
-  }else if(kind==='gen'){
-    body.innerHTML=`<div class="fpick-grid">${GEN_OPTS.map(o=>`<div class="fpick-opt${currentGen===o.v?' sel':''}" onclick="applyFilter('gen',${o.v===null?'null':o.v})">${o.l}</div>`).join('')}</div>`;
   }else{
     body.innerHTML=`<div class="fpick-grid"><div class="fpick-opt${!currentType?' sel':''}" onclick="applyFilter('type',null)">All Types</div>${TYPES.map(t=>`<div class="fpick-opt type-opt${currentType===t?' sel':''}" style="background:${TC[t]}" onclick="applyFilter('type','${t}')">${cap(t)}</div>`).join('')}</div>`;
   }
@@ -668,7 +676,6 @@ function openFilterPicker(kind){
 }
 function applyFilter(kind,value){
   if(kind==='game')currentGame=value;
-  else if(kind==='gen')currentGen=value;
   else currentType=value;
   closeFilterPicker();
   updateFilterBtns();
@@ -679,15 +686,11 @@ function updateFilterBtns(){
   const gb=document.getElementById('fb-game');
   gb.textContent=currentGame?(GAME_OPTS.find(o=>o.v===currentGame)?.l||'Game'):'🎮 All Games';
   gb.className='filter-btn'+(currentGame?' active':'');
-  const gnb=document.getElementById('fb-gen');
-  gnb.textContent=currentGen?`Gen ${['I','II','III','IV','V','VI','VII','VIII','IX'][currentGen-1]}`:'🌐 All Gens';
-  gnb.className='filter-btn'+(currentGen?' active':'');
   const tb=document.getElementById('fb-type');
   if(currentType){tb.textContent=cap(currentType);tb.className='filter-btn type-active';tb.style.background=TC[currentType];}
   else{tb.textContent='🔷 All Types';tb.className='filter-btn';tb.style.background='';}
 }
 function renderTypeFilter(){}
-function setGen(gen){currentGen=gen;updateFilterBtns();filterPokemon()}
 function setGame(game){currentGame=game;updateFilterBtns();filterPokemon()}
 function setType(type){currentType=type;updateFilterBtns();filterPokemon()}
 
@@ -754,11 +757,25 @@ function renderMovesList(id){
   const rows=moves.map(m=>{
     let vd=m.version_group_details;
     if(currentMoveGame)vd=vd.filter(v=>v.version_group.name===currentMoveGame);
-    const lvl=vd.find(v=>v.move_learn_method.name==='level-up')?.level_learned_at??'—';
-    const method=vd[0]?.move_learn_method.name||'—';
+    const lvlUp=vd.find(v=>v.move_learn_method.name==='level-up');
+    const lvl=lvlUp?.level_learned_at||null;
+    const method=vd[0]?.move_learn_method.name||'';
     return{name:m.move.name,lvl,method};
-  }).sort((a,b)=>{if(a.lvl==='—'&&b.lvl==='—')return 0;if(a.lvl==='—')return 1;if(b.lvl==='—')return -1;return a.lvl-b.lvl});
-  container.innerHTML=`<table class="move-table"><thead><tr><th>Lvl</th><th>Move</th><th>Method</th></tr></thead><tbody>${rows.map(r=>`<tr><td style="width:32px;font-weight:700">${r.lvl}</td><td class="move-name">${r.name.replace(/-/g,' ')}</td><td><span style="font-size:11px;color:var(--subtext);text-transform:capitalize">${r.method.replace(/-/g,' ')}</span></td></tr>`).join('')}</tbody></table>`;
+  }).sort((a,b)=>{if(!a.lvl&&!b.lvl)return 0;if(!a.lvl)return 1;if(!b.lvl)return -1;return a.lvl-b.lvl});
+  const methodLabel=s=>s==='level-up'?'Level-up':s==='machine'?'TM/HM':s==='egg'?'Egg':cap(s.replace(/-/g,' '));
+  container.innerHTML=rows.map(r=>{
+    const cached=moveDetailCache[r.name];
+    const learnStr=(r.lvl?`Lv.\u202f${r.lvl} · `:'')+methodLabel(r.method);
+    return`<div class="detail-move-row" data-move-detail="${r.name}">
+      <div class="dmr-top">
+        <span class="dmr-name">${r.name.replace(/-/g,' ')}</span>
+        <span class="dmr-learn">${learnStr}</span>
+      </div>
+      <div class="move-meta">${renderMoveMeta(cached||null)}</div>
+    </div>`;
+  }).join('');
+  const gen=++_detailMoveLoadGen;
+  loadDetailMoveDetails(rows,gen);
 }
 
 // ===== EVOLUTION TREE =====
@@ -961,6 +978,9 @@ function renderTeam(){
   renderTeamSelector();
   const grid=document.getElementById('team-grid');grid.innerHTML='';
   const team=activeTeam();
+  // Eagerly fetch any uncached move details, then re-render to show type pills
+  const uncached=[...new Set(team.flatMap(p=>p.moves.filter(Boolean)))].filter(m=>!moveDetailCache[m]);
+  if(uncached.length)Promise.all(uncached.map(fetchMoveDetail)).then(()=>renderTeam());
   for(let i=0;i<6;i++){
     const slot=document.createElement('div');
     if(i<team.length){
@@ -969,7 +989,12 @@ function renderTeam(){
         <button class="ts-edit" onclick="event.stopPropagation();openNickModal(${i})">✏️</button>
         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png'" alt="${p.name}"/>
         <div class="ts-name">${p.nickname||p.name}</div>${p.nickname?`<div class="ts-nick">${p.name}</div>`:''}
-        <div class="move-slots">${[0,1,2,3].map(mi=>`<button class="move-slot-btn${p.moves[mi]?' filled':''}" onclick="event.stopPropagation();openMovePicker(${i},${mi})">${p.moves[mi]?p.moves[mi].replace(/-/g,' '):'— Move '+(mi+1)}</button>`).join('')}</div>`;
+        <div class="move-slots">${[0,1,2,3].map(mi=>{
+          const mn=p.moves[mi];const md=mn?moveDetailCache[mn]:null;
+          const tc=md?TC[md.type]||'#888':'';
+          const pill=md?`<span class="msb-type" style="background:${tc}">${cap(md.type)}</span>`:'';
+          return`<button class="move-slot-btn${mn?' filled':''}" style="${tc?`border-left-color:${tc};border-left-width:3px;border-left-style:solid`:''}" onclick="event.stopPropagation();openMovePicker(${i},${mi})"><span class="msb-name">${mn?mn.replace(/-/g,' '):'— Move '+(mi+1)}</span>${pill}</button>`;
+        }).join('')}</div>`;
       slot.onclick=()=>openDetail(p.id);
     }else{slot.className='team-slot empty';slot.innerHTML='<span class="empty-lbl"><span class="empty-plus">+</span>Add Pokémon</span>';slot.onclick=()=>openAddPokePicker();}
     grid.appendChild(slot);
@@ -979,12 +1004,22 @@ function renderTeam(){
 
 function updateCoverage(){
   const team=activeTeam();
-  const teamTypes=new Set(team.flatMap(p=>p.types));
-  document.getElementById('offCoverage').innerHTML=teamTypes.size===0?'<span style="color:var(--subtext);font-size:13px">Add Pokémon to see coverage</span>':[...teamTypes].map(t=>`<span class="type-pill" style="background:${TC[t]};padding:5px 12px;font-size:12px">${cap(t)}</span>`).join('');
+  // Offensive: Pokémon own types + types of assigned moves (from cache)
+  const offTypes=new Set(team.flatMap(p=>{
+    const pkTypes=p.types||[];
+    const mvTypes=p.moves.filter(Boolean).map(m=>moveDetailCache[m]?.type).filter(Boolean);
+    return[...pkTypes,...mvTypes];
+  }));
+  document.getElementById('offCoverage').innerHTML=offTypes.size===0
+    ?'<span style="color:var(--subtext);font-size:13px">Add Pokémon to see coverage</span>'
+    :[...offTypes].map(t=>`<span class="type-pill" style="background:${TC[t]};padding:5px 12px;font-size:12px">${cap(t)}</span>`).join('');
+  // Defensive: weakness count per type
   const weakMap={};
   team.forEach(p=>{if(!p.types.length)return;const wmap=getDualWeak(p.types[0],p.types[1]);Object.entries(wmap).forEach(([t,m])=>{if(m>1)weakMap[t]=(weakMap[t]||0)+1})});
   const we=Object.entries(weakMap).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('teamWeakness').innerHTML=we.length===0?'<span style="color:var(--subtext);font-size:13px">No weaknesses identified</span>':we.map(([t,c])=>`<span class="type-pill" style="background:${TC[t]};padding:5px 12px;font-size:12px">${cap(t)} <span style="opacity:.7">×${c}</span></span>`).join('');
+  document.getElementById('teamWeakness').innerHTML=we.length===0
+    ?'<span style="color:var(--subtext);font-size:13px">No weaknesses identified</span>'
+    :we.map(([t,c])=>`<span class="type-pill" style="background:${TC[t]};padding:5px 12px;font-size:12px">${cap(t)} <span style="opacity:.7">×${c}</span></span>`).join('');
 }
 
 // ===== ADD POKEMON PICKER =====
@@ -1051,6 +1086,53 @@ function importTeams(event){
   reader.readAsText(file);event.target.value='';
 }
 
+// ===== MOVE DETAIL HELPERS =====
+async function fetchMoveDetail(name){
+  if(moveDetailCache[name])return moveDetailCache[name];
+  try{
+    const r=await fetch(`https://pokeapi.co/api/v2/move/${name}/`);
+    const d=await r.json();
+    moveDetailCache[name]={type:d.type.name,power:d.power,pp:d.pp,accuracy:d.accuracy,cat:d.damage_class.name};
+    return moveDetailCache[name];
+  }catch(e){return null;}
+}
+function moveCatLabel(cat){return cat==='physical'?'Phys':cat==='special'?'Spec':'Stat'}
+function moveCatColor(cat){return cat==='physical'?'#C03028':cat==='special'?'#6890F0':'#7A7A7A'}
+function renderMoveMeta(detail){
+  if(!detail)return`<span class="move-meta-dots">···</span>`;
+  const tc=TC[detail.type]||'#888';
+  return`<span class="move-type-pill" style="background:${tc}">${cap(detail.type)}</span>`+
+    `<span class="move-cat-pill" style="background:${moveCatColor(detail.cat)}">${moveCatLabel(detail.cat)}</span>`+
+    (detail.power?`<span class="move-stat-chip msc-power">⚡ ${detail.power}</span>`:'')+
+    `<span class="move-stat-chip msc-pp">${detail.pp} PP</span>`+
+    (detail.accuracy?`<span class="move-stat-chip msc-acc">${detail.accuracy}%</span>`:'');
+}
+let _moveLoadGen=0,_detailMoveLoadGen=0;
+async function loadDetailMoveDetails(moves,gen){
+  const BATCH=20;
+  for(let i=0;i<moves.length;i+=BATCH){
+    if(gen!==_detailMoveLoadGen)return;
+    await Promise.all(moves.slice(i,i+BATCH).map(async m=>{
+      const detail=await fetchMoveDetail(m.name);
+      if(gen!==_detailMoveLoadGen)return;
+      const el=document.querySelector(`#d-moves [data-move-detail="${CSS.escape(m.name)}"]`);
+      if(el){const meta=el.querySelector('.move-meta');if(meta)meta.innerHTML=renderMoveMeta(detail);}
+    }));
+  }
+}
+async function loadMoveDetails(moves,gen){
+  const BATCH=20;
+  for(let i=0;i<moves.length;i+=BATCH){
+    if(gen!==_moveLoadGen)return; // stale render, abort
+    await Promise.all(moves.slice(i,i+BATCH).map(async m=>{
+      const detail=await fetchMoveDetail(m.move.name);
+      if(gen!==_moveLoadGen)return;
+      const el=document.querySelector(`#move-modal-list [data-move="${CSS.escape(m.move.name)}"]`);
+      if(el){const meta=el.querySelector('.move-meta');if(meta)meta.innerHTML=renderMoveMeta(detail);}
+    }));
+  }
+}
+
 // ===== MOVE PICKER =====
 async function openMovePicker(slotIdx,moveIdx){
   const p=activeTeam()[slotIdx];if(!p)return;
@@ -1077,9 +1159,26 @@ function filterModalMoves(){
   if(q)moves=moves.filter(m=>m.move.name.includes(q));
   const list=document.getElementById('move-modal-list');
   if(!moves.length){list.innerHTML='<div class="modal-move-none">No moves found</div>';return}
-  list.innerHTML=`<div class="modal-move-item" onclick="selectMove(null)"><span class="modal-move-name" style="color:var(--subtext)">— Clear move slot</span></div>`+moves.slice(0,200).map(m=>`<div class="modal-move-item" onclick="selectMove('${m.move.name}')"><span class="modal-move-name">${m.move.name.replace(/-/g,' ')}</span></div>`).join('');
+  const shown=moves.slice(0,200);
+  list.innerHTML=`<div class="modal-move-item" onclick="selectMove(null)"><span class="modal-move-name" style="color:var(--subtext)">— Clear move slot</span></div>`+
+    shown.map(m=>{
+      const cached=moveDetailCache[m.move.name];
+      return`<div class="modal-move-item" data-move="${m.move.name}" onclick="selectMove('${m.move.name}')">
+        <span class="modal-move-name">${m.move.name.replace(/-/g,' ')}</span>
+        <div class="move-meta">${renderMoveMeta(cached||null)}</div>
+      </div>`;
+    }).join('');
+  const gen=++_moveLoadGen;
+  loadMoveDetails(shown,gen);
 }
-function selectMove(name){activeTeam()[movePicker.slotIndex].moves[movePicker.moveIndex]=name;saveTeams();document.getElementById('move-modal').classList.remove('open')}
+function selectMove(name){
+  activeTeam()[movePicker.slotIndex].moves[movePicker.moveIndex]=name;
+  saveTeams();
+  document.getElementById('move-modal').classList.remove('open');
+  // Eagerly fetch move detail so the team card border updates immediately
+  if(name&&!moveDetailCache[name])fetchMoveDetail(name).then(()=>renderTeam());
+  else renderTeam();
+}
 document.getElementById('move-modal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open')});
 
 // ===== NICKNAME =====
