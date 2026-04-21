@@ -350,7 +350,13 @@
   </div>
   <div class="team-grid" id="team-grid"></div>
   <div class="coverage-card">
-    <div class="coverage-title">⚔️ Offensive Type Coverage</div>
+    <div class="coverage-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>⚔️ Offensive Type Coverage</span>
+      <span id="offCoveragePct" style="font-size:13px;font-weight:700;color:var(--subtext)"></span>
+    </div>
+    <div id="offCoverageBar" style="height:6px;border-radius:3px;background:#f0f0f0;margin-bottom:12px;overflow:hidden;display:none">
+      <div id="offCoverageBarFill" style="height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)"></div>
+    </div>
     <div class="coverage-types" id="offCoverage"></div>
   </div>
   <div class="coverage-card">
@@ -1005,11 +1011,25 @@ function renderTeam(){
 function updateCoverage(){
   const team=activeTeam();
   // Offensive: Pokémon own types + types of assigned moves (from cache)
-  const offTypes=new Set(team.flatMap(p=>{
-    const pkTypes=p.types||[];
-    const mvTypes=p.moves.filter(Boolean).map(m=>moveDetailCache[m]?.type).filter(Boolean);
-    return[...pkTypes,...mvTypes];
-  }));
+  const offTypes=new Set(team.flatMap(p=>
+    p.moves.filter(Boolean).map(m=>moveDetailCache[m]?.type).filter(Boolean)
+  ));
+  // Coverage %: how many of the 18 types have at least one super-effective attack
+  const coveredTypes=TYPES.filter(def=>[...offTypes].some(atk=>getEff(atk,def)>1));
+  const pct=offTypes.size===0?0:Math.round(coveredTypes.length/TYPES.length*100);
+  const barColor=pct>=80?'#78C850':pct>=50?'#F8D030':'#F08030';
+  const pctEl=document.getElementById('offCoveragePct');
+  const barWrap=document.getElementById('offCoverageBar');
+  const barFill=document.getElementById('offCoverageBarFill');
+  if(offTypes.size>0){
+    pctEl.textContent=pct+'%';
+    pctEl.style.color=barColor;
+    barWrap.style.display='block';
+    requestAnimationFrame(()=>{barFill.style.width=pct+'%';barFill.style.background=barColor;});
+  }else{
+    pctEl.textContent='';
+    barWrap.style.display='none';
+  }
   document.getElementById('offCoverage').innerHTML=offTypes.size===0
     ?'<span style="color:var(--subtext);font-size:13px">Add Pokémon to see coverage</span>'
     :[...offTypes].map(t=>`<span class="type-pill" style="background:${TC[t]};padding:5px 12px;font-size:12px">${cap(t)}</span>`).join('');
