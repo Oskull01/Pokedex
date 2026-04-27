@@ -73,8 +73,11 @@
     .poke-row.in-team{outline:2px solid #F8D030}
     .poke-row-img{width:62px;height:62px;object-fit:contain;flex-shrink:0;padding:4px}
     .poke-row-body{flex:1;padding:10px 8px 10px 10px;min-width:0}
-    .poke-row-num{font-size:11px;color:var(--subtext);font-weight:500}
+    .poke-row-num{font-size:11px;color:var(--subtext);font-weight:500;display:flex;align-items:center;gap:4px;margin-bottom:2px}
     .poke-row-name{font-size:15px;font-weight:700;text-transform:capitalize;margin-bottom:5px}
+    .region-badge{font-size:9px;font-weight:700;color:white;padding:2px 6px;border-radius:4px;letter-spacing:.3px;flex-shrink:0}
+    .ability-pill{cursor:pointer;position:relative}
+    .ability-pill:active{opacity:0.7}
     .poke-row-types{display:flex;gap:4px;flex-wrap:wrap}
     .type-pill{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:700;color:white;text-shadow:0 1px 2px rgba(0,0,0,.25)}
     .poke-row-right{padding:0 12px 0 4px;display:flex;align-items:center}
@@ -93,9 +96,9 @@
     .panel-back{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.3);border:none;border-radius:10px;padding:7px 13px;color:white;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:14px}
     .detail-header{padding:max(calc(env(safe-area-inset-top) + 14px), 60px) 18px 16px;background:linear-gradient(150deg,var(--hcol,#888) 0%,color-mix(in srgb,var(--hcol,#888) 70%,black) 100%);position:relative;color:white;min-height:180px}
     .detail-hero-img{position:absolute;right:12px;bottom:8px;width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 4px 14px rgba(0,0,0,.25))}
-    .dh-num{font-size:12px;opacity:.75;margin-bottom:3px}
-    .dh-name{font-size:30px;font-weight:800;text-transform:capitalize;margin-bottom:8px}
-    .dh-types{display:flex;gap:7px;margin-bottom:10px}
+    .dh-num{font-size:12px;opacity:.75;margin-bottom:3px;max-width:calc(100% - 158px)}
+    .dh-name{font-size:30px;font-weight:800;text-transform:capitalize;margin-bottom:8px;max-width:calc(100% - 158px);word-break:break-word}
+    .dh-types{display:flex;gap:7px;margin-bottom:10px;max-width:calc(100% - 158px);flex-wrap:wrap}
     .dh-type{padding:4px 14px;border-radius:16px;background:rgba(255,255,255,.28);font-size:13px;font-weight:600;text-transform:capitalize}
 
 
@@ -214,6 +217,13 @@
     .coverage-types{display:flex;flex-wrap:wrap;gap:5px}
     .cov-section-lbl{font-size:11px;font-weight:700;color:var(--subtext);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px}
     .missing-pill{opacity:0.35;filter:saturate(0.6)}
+
+    /* ABILITY MODAL */
+    .ability-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:700;display:none;align-items:flex-end}
+    .ability-modal-overlay.open{display:flex}
+    .ability-modal-sheet{background:rgba(255,255,255,0.92);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--glass-border);border-bottom:none;border-radius:20px 20px 0 0;width:100%;padding:0 16px calc(var(--safe-bottom)+20px)}
+    .ability-modal-name{font-size:19px;font-weight:800;padding:16px 0 6px;text-align:center;text-transform:capitalize;letter-spacing:.2px}
+    .ability-modal-desc{font-size:14px;line-height:1.65;color:var(--text);padding:10px 2px 22px;min-height:60px}
 
     /* TYPE CHART CALCULATOR */
     #types-view{display:none;padding:16px 16px calc(var(--safe-bottom)+70px)}
@@ -517,6 +527,16 @@
   </div>
 </div>
 
+<!-- ABILITY INFO MODAL -->
+<div class="ability-modal-overlay" id="ability-modal" onclick="if(event.target===this)closeAbilityModal()">
+  <div class="ability-modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="ability-modal-name" id="ability-modal-name">Ability</div>
+    <div class="ability-modal-desc" id="ability-modal-desc"><div class="loader-wrap"><div class="loader"></div></div></div>
+    <button class="fpick-cancel" onclick="closeAbilityModal()">Close</button>
+  </div>
+</div>
+
 <script>
 // ===== CONSTANTS =====
 const TYPES=['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
@@ -536,6 +556,15 @@ const HARDCODED_EVO_CONDS={
   'kingambit':['Defeat 3 Bisharp leaders'],
   'iron-leaves':['Tera Raid'],
   'walking-wake':['Tera Raid'],
+};
+
+// Regional variant config — suffix order matters (check longer ones first if ambiguous)
+const REGIONAL_SUFFIXES=['-alola','-galar','-hisui','-paldea'];
+const REGION_META={
+  alola:{label:'Alola',color:'#F8A028',games:['sun-moon','ultra-sun-ultra-moon']},
+  galar:{label:'Galar',color:'#C03028',games:['sword-shield']},
+  hisui:{label:'Hisui',color:'#5090B8',games:[]},
+  paldea:{label:'Paldea',color:'#7038F8',games:['scarlet-violet']},
 };
 
 // ===== HELPERS =====
@@ -569,9 +598,35 @@ async function init(){
   };
   document.getElementById('poke-list').innerHTML='<div class="loader-wrap"><div class="loader"></div></div>';
   try{
-    const r=await fetch('https://pokeapi.co/api/v2/pokemon?limit=1025');
+    const r=await fetch('https://pokeapi.co/api/v2/pokemon?limit=1500');
     const d=await r.json();
-    allPokemon=d.results.map((p,i)=>({id:i+1,name:p.name}));
+    // Separate base Pokémon (IDs 1-1025) from regional variants
+    const base=[],variants=[];
+    d.results.forEach(p=>{
+      const id=parseInt(p.url.split('/').filter(Boolean).pop());
+      let regionFound=null;
+      for(const suffix of REGIONAL_SUFFIXES){
+        const idx=p.name.indexOf(suffix);
+        if(idx>0){regionFound={region:suffix.slice(1),baseName:p.name.slice(0,idx)};break;}
+      }
+      if(regionFound){
+        variants.push({id,name:p.name,baseName:regionFound.baseName,region:regionFound.region});
+      }else if(id<=1025){
+        base.push({id,name:p.name});
+      }
+    });
+    base.sort((a,b)=>a.id-b.id);
+    // Build final list: each base Pokémon followed by its regional variants
+    allPokemon=[];
+    const baseByName={};base.forEach(bp=>baseByName[bp.name]=bp);
+    base.forEach(bp=>{
+      allPokemon.push(bp);
+      const myVars=variants.filter(v=>v.baseName===bp.name);
+      myVars.forEach(v=>v.baseId=bp.id);
+      allPokemon.push(...myVars);
+    });
+    // Orphaned variants (base not found) — append at end
+    variants.filter(v=>!v.baseId).forEach(v=>{v.baseId=v.id;allPokemon.push(v);});
     filteredPokemon=[...allPokemon];
     renderList(filteredPokemon.slice(0,PAGE));setupScroll();
   }catch(e){document.getElementById('poke-list').innerHTML='<div class="empty-msg">⚠️ Could not load. Check connection.</div>'}
@@ -590,13 +645,18 @@ function appendRows(pokemon){
     const row=document.createElement('div');
     const inCurr=activeTeam().some(pk=>pk.id===p.id);
     const inAny=teams.some(t=>t.pokemon.some(pk=>pk.id===p.id));
+    const isVariant=!!p.region;
+    const displayId=isVariant?(p.baseId||p.id):p.id;
+    const displayName=isVariant?cap(p.baseName):cap(p.name);
+    const regionMeta=isVariant?REGION_META[p.region]:null;
+    const regionBadge=regionMeta?`<span class="region-badge" style="background:${regionMeta.color}">${regionMeta.label}</span>`:'';
     row.className='poke-row'+(inCurr?' in-team':'');
     row.id='row-'+p.id;row.onclick=()=>openDetail(p.id);
     row.style.background=typeCache[p.id]?typeGlass(typeCache[p.id][0]):'rgba(255,255,255,0.62)';
     row.innerHTML=`<img class="poke-row-img" loading="lazy" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="${p.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${p.id}.png'"/>
       <div class="poke-row-body">
-        <div class="poke-row-num">#${String(p.id).padStart(4,'0')}</div>
-        <div class="poke-row-name">${p.name}</div>
+        <div class="poke-row-num">#${String(displayId).padStart(4,'0')} ${regionBadge}</div>
+        <div class="poke-row-name">${displayName}</div>
         <div class="poke-row-types" id="rt-${p.id}">${typeCache[p.id]?typeCache[p.id].map(t=>`<span class="type-pill" style="background:${TC[t]}">${cap(t)}</span>`).join(''):'<span style="font-size:10px;color:var(--subtext)">…</span>'}</div>
       </div>
       <div class="poke-row-right"><span class="fav-star ${inAny?'on':''}">⭐</span></div>`;
@@ -630,9 +690,18 @@ async function filterPokemon(){
   let base=allPokemon;
   if(currentGame){
     const ids=await getGameIds(currentGame);
-    base=base.filter(p=>ids.has(p.id));
+    base=base.filter(p=>{
+      if(p.region){
+        // Regional variant: only show if the game matches this region AND base species is in the dex
+        return REGION_META[p.region]&&REGION_META[p.region].games.includes(currentGame)&&ids.has(p.baseId);
+      }
+      return ids.has(p.id);
+    });
   }
-  if(q)base=base.filter(p=>p.name.includes(q)||String(p.id).includes(q));
+  if(q)base=base.filter(p=>{
+    const nm=p.baseName||p.name;
+    return nm.includes(q)||p.name.includes(q)||String(p.baseId||p.id).includes(q)||String(p.id).includes(q);
+  });
   if(currentType){
     const ids=await getTypeIds(currentType);
     base=base.filter(p=>ids.has(p.id));
@@ -724,8 +793,11 @@ async function openDetail(id){
   document.getElementById('detail-panel').classList.add('open');
   document.body.style.overflow='hidden';
   switchDetailTab('info');
-  document.getElementById('dh-name').textContent=allPokemon.find(p=>p.id===id)?.name||'';
-  document.getElementById('dh-num').textContent='#'+String(id).padStart(4,'0');
+  const _pokeEntry=allPokemon.find(p=>p.id===id);
+  const _isVariant=!!_pokeEntry?.region;
+  const _displayId=_isVariant?(_pokeEntry.baseId||id):id;
+  document.getElementById('dh-name').textContent=_isVariant?cap(_pokeEntry.baseName)+' ('+REGION_META[_pokeEntry.region].label+')':(_pokeEntry?.name||'');
+  document.getElementById('dh-num').textContent='#'+String(_displayId).padStart(4,'0');
   document.getElementById('dh-types').innerHTML='';
   document.getElementById('d-stats').innerHTML='<div class="loader-wrap"><div class="loader"></div></div>';
   document.getElementById('d-moves').innerHTML='<div class="loader-wrap"><div class="loader"></div></div>';
@@ -738,7 +810,8 @@ async function openDetail(id){
     if(!data){const r=await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);data=await r.json();detailCache[id]=data;typeCache[id]=data.types.map(t=>t.type.name)}
     const types=data.types.map(t=>t.type.name);
     document.getElementById('dh').style.setProperty('--hcol',TC[types[0]]||'#666');
-    document.getElementById('dh-name').textContent=data.name;
+    // Keep the nicely-formatted name we already set; only fall back to raw API name if entry not found
+    if(!_isVariant)document.getElementById('dh-name').textContent=data.name;
     document.getElementById('dh-types').innerHTML=types.map(t=>`<span class="dh-type">${cap(t)}</span>`).join('');
     document.getElementById('d-info').innerHTML=`
       <div class="info-cell"><div class="info-cell-lbl">Height</div><div class="info-cell-val">${(data.height/10).toFixed(1)} m</div></div>
@@ -748,7 +821,7 @@ async function openDetail(id){
     const SC={hp:'#FF5959',attack:'#F5AC78',defense:'#FAE078','special-attack':'#9DB7F5','special-defense':'#A7DB8D',speed:'#FA92B2'};
     const SL={hp:'HP',attack:'Attack',defense:'Defense','special-attack':'Sp. Atk','special-defense':'Sp. Def',speed:'Speed'};
     document.getElementById('d-stats').innerHTML=data.stats.map(s=>`<div class="stat-row"><div class="stat-lbl">${SL[s.stat.name]||s.stat.name}</div><div class="stat-bar"><div class="stat-fill" style="width:${Math.min(100,(s.base_stat/255)*100)}%;background:${SC[s.stat.name]||'#aaa'}"></div></div><div class="stat-val">${s.base_stat}</div></div>`).join('');
-    document.getElementById('d-abil').innerHTML=data.abilities.map(a=>`<span class="info-cell" style="padding:8px 12px;font-size:13px;font-weight:600;text-transform:capitalize">${a.ability.name.replace(/-/g,' ')}${a.is_hidden?' <span style="font-size:10px;color:var(--subtext)">(Hidden)</span>':''}</span>`).join('');
+    document.getElementById('d-abil').innerHTML=data.abilities.map(a=>`<span class="info-cell ability-pill" style="padding:8px 12px;font-size:13px;font-weight:600;text-transform:capitalize" onclick="openAbilityInfo('${a.ability.name}')">${a.ability.name.replace(/-/g,' ')}${a.is_hidden?' <span style="font-size:10px;color:var(--subtext)">(Hidden)</span>':''} <span style="font-size:10px;color:#F08030;font-weight:500">ⓘ</span></span>`).join('');
     // Weaknesses with proper double-type multipliers
     const wmap=getDualWeak(types[0],types[1]);
     const weak=[],resist=[],immune=[];
@@ -1091,11 +1164,14 @@ function renderAddPokeList(query){
     const inTeam=teamIds.has(p.id);
     const types=typeCache[p.id]||[];
     const typePills=types.map(t=>`<span style="background:${TC[t]};color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px">${cap(t)}</span>`).join('');
+    const isVariant=!!p.region;
+    const dispName=isVariant?cap(p.baseName)+' ('+REGION_META[p.region].label+')':cap(p.name);
+    const dispId=isVariant?(p.baseId||p.id):p.id;
     return`<div class="add-poke-item${inTeam?' in-team':''}" onclick="${inTeam?'':'addPokemonFromPicker('+p.id+')'}">
       <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" alt="${p.name}"/>
       <div>
-        <div class="add-poke-name">${cap(p.name)}</div>
-        <div class="add-poke-num">#${String(p.id).padStart(3,'0')}</div>
+        <div class="add-poke-name">${dispName}</div>
+        <div class="add-poke-num">#${String(dispId).padStart(3,'0')}</div>
         ${typePills?`<div class="add-poke-types">${typePills}</div>`:''}
       </div>
       ${inTeam?'<span class="add-poke-badge">In team</span>':''}
@@ -1234,6 +1310,26 @@ document.getElementById('move-modal').addEventListener('click',function(e){if(e.
 function openNickModal(i){nickPicker={slotIndex:i};const p=activeTeam()[i];document.getElementById('nick-modal-title').textContent='Nickname — '+p.name;document.getElementById('nick-input').value=p.nickname||'';document.getElementById('nick-modal').classList.add('open');setTimeout(()=>document.getElementById('nick-input').focus(),100)}
 function closeNickModal(){document.getElementById('nick-modal').classList.remove('open')}
 function saveNickname(){activeTeam()[nickPicker.slotIndex].nickname=document.getElementById('nick-input').value.trim();saveTeams();closeNickModal()}
+
+// ===== ABILITY INFO =====
+const abilityCache={};
+async function openAbilityInfo(name){
+  document.getElementById('ability-modal-name').textContent=name.replace(/-/g,' ');
+  document.getElementById('ability-modal-desc').innerHTML='<div class="loader-wrap"><div class="loader"></div></div>';
+  document.getElementById('ability-modal').classList.add('open');
+  if(!abilityCache[name]){
+    try{
+      const r=await fetch(`https://pokeapi.co/api/v2/ability/${name}/`);
+      const d=await r.json();
+      // Prefer short_effect from effect_entries (most descriptive), fall back to flavor text
+      const enEffect=d.effect_entries.find(e=>e.language.name==='en');
+      const enFlavor=[...d.flavor_text_entries].reverse().find(e=>e.language.name==='en');
+      abilityCache[name]=enEffect?.short_effect||enFlavor?.flavor_text||'No description available.';
+    }catch(e){abilityCache[name]='Could not load ability info.'}
+  }
+  document.getElementById('ability-modal-desc').textContent=abilityCache[name];
+}
+function closeAbilityModal(){document.getElementById('ability-modal').classList.remove('open')}
 
 // ===== TYPE CHART CALCULATOR =====
 let calcType1=null,calcType2=null,activePickerSlot=1;
